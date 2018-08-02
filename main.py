@@ -10,6 +10,30 @@ from kl_divergence import *
 from gan import *
 
 
+def plot_gaussian():
+    fig = plt.figure(figsize=(8, 8))
+    plt.xlim([-4, 4])
+    plt.ylim([-4, 4])
+    df = pd.DataFrame(train_data, columns=["x", "y"])
+    df2 = pd.DataFrame(generated_data, columns=["x", "y"])
+
+    ax = fig.add_subplot(1, 1, 1)
+    ax = sns.kdeplot(df2.x, df2.y, cmap="Blues", shade=True, shade_lowest=False, bw=.1, xlim=(-1, 1),
+                     ylim=(-1, 1))
+    pylab.plot()
+    plt.show()
+
+
+def save_pickles(kl_list):
+    # save data
+    now = date.datetime.now()
+    time = "{0:%Y%m%d_%H%M%S}".format(now)
+
+    with open("kldump_" + time + ".pickle", mode='wb') as f:
+        pickle.dump(kl_list, f)
+    print("END")
+
+
 if __name__ == "__main__":
     sns.set_style('whitegrid')
     sns.set_context('talk')
@@ -20,7 +44,6 @@ if __name__ == "__main__":
 
     g_loss_history = []
     d_loss_history = []
-    d_average_history = []
     kl_history = []
 
     with tf.Session() as sess:
@@ -50,27 +73,4 @@ if __name__ == "__main__":
                 kl_history.append(kl)
                 print("KL : ", kl)
 
-                if False:
-                    fig = plt.figure(figsize=(8, 8))
-                    plt.xlim([-4, 4])
-                    plt.ylim([-4, 4])
-                    df = pd.DataFrame(train_data, columns=["x", "y"])
-                    df2 = pd.DataFrame(generated_data, columns=["x", "y"])
-
-                    ax = fig.add_subplot(1, 1, 1)
-                    ax = sns.kdeplot(df2.x, df2.y, cmap="Blues", shade=True, shade_lowest=False, bw=.1, xlim=(-1, 1),
-                                     ylim=(-1, 1))
-                    pylab.plot()
-
-                    plt.show()
-
-    # save data
-    now = date.datetime.now()
-    time = "{0:%Y%m%d_%H%M%S}".format(now)
-
-    with open("kldump_" + time + ".pickle", mode='wb') as f:
-        pickle.dump(kl_history, f)
-    with open("distance_dump_" + time + ".pickle", mode='wb') as f:
-        pickle.dump(d_average_history, f)
-    print("END")
     sess.close()
