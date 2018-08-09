@@ -36,8 +36,8 @@ class BaseDiscriminator:
 
 class VanillaDiscriminator:
     def __init__(self):
-        self.reuse = False
         self.base_discriminator = BaseDiscriminator()
+        self.reuse = self.base_discriminator.reuse
 
     def __call__(self, inputs, training=False, name=''):
         outputs = self.base_discriminator(inputs, training, name)
@@ -48,6 +48,23 @@ class VanillaDiscriminator:
 
         self.reuse = True
         self.variables = [tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='v_d'),
+                          self.base_discriminator.variables]
+        return outputs
+
+
+class WassersteinDiscriminator:
+    def __init__(self):
+        self.base_discriminator = BaseDiscriminator()
+        self.reuse = self.base_discriminator.reuse
+
+    def __call__(self, inputs, training=False, name=''):
+        outputs = self.base_discriminator(inputs, training, name)
+
+        with tf.name_scope('w_d'), tf.variable_scope('w_d', reuse=self.reuse):
+            outputs = tf.layers.dense(inputs=outputs, units=1, name='d_out')
+
+        self.reuse = True
+        self.variables = [tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='w_d'),
                           self.base_discriminator.variables]
         return outputs
 
