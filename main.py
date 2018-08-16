@@ -68,7 +68,7 @@ if __name__ == "__main__":
             g_loss_history.append(g_loss_val)
             d_loss_history.append(d_loss_val)
 
-            if step % 1 == 0:
+            if step % 100 == 0:
                 generated_data = sess.run(gan.sample_data(tf.random_uniform([b_size, z_dims], minval=-1.0, maxval=1.0)
                                                           ))
                 gt = train_data
@@ -79,4 +79,6 @@ if __name__ == "__main__":
 
     sess.close()
 
-    plt.plot(kl_history)
+    plt.plot( [i for i in range(0, 10001, 100)], kl_history, label="Proposed")
+    plt.legend()
+    plt.show()
