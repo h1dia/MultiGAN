@@ -56,21 +56,27 @@ if __name__ == "__main__":
         train_op = gan.train(losses)
 
         sess.run(tf.global_variables_initializer())
+        with tf.name_scope('summary'):
+            tf.summary.scalar('kl', kl_history)
+            merged = tf.summary.merge_all()
+            writer = tf.summary.FileWriter('./logs', sess.graph)
 
-        for step in range(0, 30000 + 1):
+        for step in range(0, 10000 + 1):
             # Run network
-            __, g_loss_val, d_loss_val = sess.run([train_op, losses[gan.g], losses[gan.d]])
+            __, g_loss_val, d_loss_val, wd_loss_val = sess.run([train_op, losses[gan.g], losses[gan.d], losses[gan.wd]])
 
             g_loss_history.append(g_loss_val)
             d_loss_history.append(d_loss_val)
 
-            if step % 1000 == 0:
+            if step % 1 == 0:
                 generated_data = sess.run(gan.sample_data(tf.random_uniform([b_size, z_dims], minval=-1.0, maxval=1.0)
                                                           ))
                 gt = train_data
-                print("epoch : ", step, " ", d_loss_val, " ", g_loss_val, " ")
+                print("epoch : ", step, " ", d_loss_val, " ", g_loss_val, " ", wd_loss_val)
                 kl = kl_divergence_2d(generated_data.T, train_data.T)
                 kl_history.append(kl)
                 print("KL : ", kl)
 
     sess.close()
+
+    plt.plot(kl_history)
